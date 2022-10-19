@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3001",
+    origin: "https://demo.safaribust.co.ke",
   },
 });
 
