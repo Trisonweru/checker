@@ -52,7 +52,6 @@ const getApiAndEmit = (socket) => {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
                           var row = result[key];
-                          console.log(row)
                           const transaction= await Transaction.findOne({trans_id:row.trans_id})
                           if(!transaction ){
                           const trans= new Transaction({
