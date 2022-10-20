@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://demo.safaribust.co.ke",
+    origin: "https://safaribust.co.ke",
   },
 });
 
