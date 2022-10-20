@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3001",
+    origin: "https://demo.safaribust.co.ke",
   },
 });
 
@@ -68,7 +68,7 @@ const getApiAndEmit = (socket) => {
                           account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
                           account.save()
                           // const ipAddress = req.socket.remoteAddress;
-                            console.log(row)
+                            // console.log(row)
                           const user = await User.findOne({ phone:row.bill_ref_number});
                           const log = new Logs({
                             ip: "deposits",
