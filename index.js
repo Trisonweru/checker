@@ -62,7 +62,7 @@ const getApiAndEmit = (socket) => {
                                   amount:row.trans_amount,
                                   phone: row.bill_ref_number
                             })
-                          await trans.save()
+                         trans.save()
                           const account = await Account.findOne({ phone:row.bill_ref_number});
                           account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
                           account.save()
