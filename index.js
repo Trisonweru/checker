@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://demo.safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -45,6 +45,7 @@ const getApiAndEmit = (socket) => {
                   password: ";,bp~AcEX,*a",
                   database:"bustadmin_paydb"
                 });
+                console.log("row")
                   con.connect(function(err) {
                     if (err) throw err;
                       
@@ -67,7 +68,7 @@ const getApiAndEmit = (socket) => {
                           account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
                           account.save()
                           // const ipAddress = req.socket.remoteAddress;
-
+                            console.log(row)
                           const user = await User.findOne({ phone:row.bill_ref_number});
                           const log = new Logs({
                             ip: "deposits",
@@ -80,15 +81,16 @@ const getApiAndEmit = (socket) => {
                               };
                               // Emitting a new message. Will be consumed by the client
                            io.sockets.emit("FromAPI2", response);
-                         return con.end(()=>console.log("connection closed"))
+                         return 
                           }
+                                                      console.log(row)
                    const response = {
                                 deposited: false,
                               };
                               // Emitting a new message. Will be consumed by the client
                               
                            io.sockets.emit("FromAPI2", response);
-                     return con.end(()=>console.log("connection closed"))
+                     return 
                      });
                 })
               return con.end(()=>console.log("connection closed"))
