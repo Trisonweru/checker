@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
   if (interval) {
     clearInterval(interval);
   }
-  setInterval(() => getApiAndEmit(socket), 20000);
+  setInterval(() => getApiAndEmit(socket), 5000);
   socket.on("disconnect", (reason) => {
     // console.log(reason);
   });
@@ -45,7 +45,7 @@ const getApiAndEmit = (socket) => {
                   password: ";,bp~AcEX,*a",
                   database:"bustadmin_paydb"
                 });
-                console.log("row")
+                // console.log("row")
                   con.connect(function(err) {
                     if (err) throw err;
                       
@@ -67,8 +67,7 @@ const getApiAndEmit = (socket) => {
                           const account = await Account.findOne({ phone:row.bill_ref_number});
                           account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
                           account.save()
-                          // const ipAddress = req.socket.remoteAddress;
-                            // console.log(row)
+                        // console.log(parseFloat(account?.balance) + parseFloat(row.trans_amount))
                           const user = await User.findOne({ phone:row.bill_ref_number});
                           const log = new Logs({
                             ip: "deposits",
