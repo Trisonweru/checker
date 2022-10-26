@@ -82,7 +82,6 @@ const getApiAndEmit = (socket) => {
                            io.sockets.emit("FromAPI2", response);
                          return 
                           }
-                                                      console.log(row)
                    const response = {
                                 deposited: false,
                               };
