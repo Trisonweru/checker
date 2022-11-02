@@ -63,30 +63,30 @@ const getApiAndEmit = (socket) => {
                                   amount:row.trans_amount,
                                   phone: row.bill_ref_number
                             })
-                         trans.save()
+                          trans.save()
                           const account = await Account.findOne({ phone:row.bill_ref_number});
                           account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
                           account.save()
-                        // console.log(parseFloat(account?.balance) + parseFloat(row.trans_amount))
                           const user = await User.findOne({ phone:row.bill_ref_number});
-                          const log = new Logs({
-                            ip: "deposits",
-                            description: `${row.bill_ref_number} deposited ${row.trans_amount}- Account:${row.bill_ref_number}`,
-                            user: user.id,
-                          });
-                          log.save();
+                          const av_log = await Logs.findOne({ transactionId:row.trans_id});
+                          if(!av_log){
+                              const log = new Logs({
+                                  ip: "deposit",
+                                  description: `${row.bill_ref_number} deposited ${row.trans_amount} - Code:${row.trans_id}`,
+                                  user: user.id,
+                                  transactionId:row.trans_id
+                              });
+                            log.save();
+                          }
                           const response = {
                                 deposited: true,
                               };
-                              // Emitting a new message. Will be consumed by the client
                            io.sockets.emit("FromAPI2", response);
                          return 
-                          }
+                        }
                    const response = {
                                 deposited: false,
-                              };
-                              // Emitting a new message. Will be consumed by the client
-                              
+                              };                              
                            io.sockets.emit("FromAPI2", response);
                      return 
                      });
@@ -96,7 +96,6 @@ const getApiAndEmit = (socket) => {
           }catch(err){
             console.log(err)
           }
-  
 };
 
 mongoose

@@ -20,6 +20,10 @@ const logsSchema = new Schema(
       type: Number,
       required: false,
     },
+    transactionId:{
+      type: String,
+      required: false,
+    },
     at: {
       type: Number,
       required: false,
