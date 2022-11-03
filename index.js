@@ -25,6 +25,8 @@ const io = socketIo(server, {
   },
 });
 
+const ids=[]
+
 io.on("connection", (socket) => {
   console.log("client connected: ", socket.id);
   if (interval) {
@@ -32,7 +34,6 @@ io.on("connection", (socket) => {
   }
   setInterval(() => getApiAndEmit(socket), 5000);
   socket.on("disconnect", (reason) => {
-    // console.log(reason);
   });
 });
 
@@ -45,7 +46,6 @@ const getApiAndEmit = (socket) => {
                   password: ";,bp~AcEX,*a",
                   database:"bustadmin_paydb"
                 });
-                // console.log("row")
                   con.connect(function(err) {
                     if (err) throw err;
                       
@@ -54,7 +54,7 @@ const getApiAndEmit = (socket) => {
                         Object.keys(result).forEach(async function(key) {
                           var row = result[key];
                           const transaction= await Transaction.findOne({trans_id:row.trans_id})
-                          if(!transaction ){
+                          if(!transaction && !ids.includes(row.trans_id) ){
                           const trans= new Transaction({
                                   type:"Deposit",
                                   trans_id:row.trans_id,
@@ -78,6 +78,7 @@ const getApiAndEmit = (socket) => {
                               });
                             log.save();
                           }
+                          ids.push(row.trans_id)
                           const response = {
                                 deposited: true,
                               };
