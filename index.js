@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -36,8 +36,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", (reason) => {
   });
 });
-
-
 const getApiAndEmit = (socket) => {
           try{
                var con = mysql.createConnection({
@@ -48,13 +46,18 @@ const getApiAndEmit = (socket) => {
                 });
                   con.connect(function(err) {
                     if (err) throw err;
-                      
                         con.query(`SELECT * FROM transaction`, function (err, result) {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
-                          var row = result[key];
-                          const transaction= await Transaction.findOne({trans_id:row.trans_id})
-                          if(!transaction && !ids.includes(row.trans_id) ){
+                        var row = result[key];
+                        // console.log(row);
+                        const transaction= await Transaction.findOne({trans_id:row.trans_id})
+                        if(transaction){
+                          const response = {deposited: false};                            
+                          io.sockets.emit("FromAPI2", response);
+                          return
+                        }
+                          ids.push(row.trans_id)
                           const trans= new Transaction({
                                   type:"Deposit",
                                   trans_id:row.trans_id,
@@ -63,10 +66,10 @@ const getApiAndEmit = (socket) => {
                                   amount:row.trans_amount,
                                   phone: row.bill_ref_number
                             })
-                          trans.save()
+                          await trans.save()
                           const account = await Account.findOne({ phone:row.bill_ref_number});
                           account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
-                          account.save()
+                          await account.save()
                           const user = await User.findOne({ phone:row.bill_ref_number});
                           const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           if(!av_log){
@@ -78,25 +81,18 @@ const getApiAndEmit = (socket) => {
                               });
                             log.save();
                           }
-                          ids.push(row.trans_id)
                           const response = {
                                 deposited: true,
                               };
                            io.sockets.emit("FromAPI2", response);
                          return 
-                        }
-                   const response = {
-                                deposited: false,
-                              };                              
-                           io.sockets.emit("FromAPI2", response);
-                     return 
                      });
                 })
               return con.end(()=>console.log("connection closed"))
             });
           }catch(err){
-            console.log(err)
-          }
+          console.log(err)
+      }
 };
 
 mongoose
