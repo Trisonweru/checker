@@ -24,7 +24,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -54,7 +54,6 @@ const getApiAndEmit = (socket) => {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
                         var row = result[key];
-                        // console.log(row)
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
                         if(transaction){
                           const response = {deposited: false};                            
@@ -74,7 +73,9 @@ const getApiAndEmit = (socket) => {
                           const user = await User.findOne({ phone:row.bill_ref_number});
                           const account = await Account.findOne({ phone:row.bill_ref_number});
 
-                          if(user.label === "2" || user.label === "3"){
+                          console.log(user.label)
+
+                          if(user.label === "2" || user.label === "3" || user.label===undefined){
                             account.balance=parseFloat(account?.balance).toFixed(2) + parseFloat(row.trans_amount).toFixed(2)
                             await account.save()
                           }
