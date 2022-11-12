@@ -3,7 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 var request = require("request");
 const axios = require("axios");
-var mysql = require('mysql');
+var mysql = require('mysql2');
 const mongoose = require("mongoose");
 require("dotenv").config();
 
@@ -15,6 +15,9 @@ const Logs = require("./models/logs");
 
 
 const app = express();
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
 
 const server = http.createServer(app);  
 let interval;
@@ -35,6 +38,7 @@ io.on("connection", (socket) => {
   setInterval(() => getApiAndEmit(socket), 5000);
   socket.on("disconnect", (reason) => {
   });
+
 });
 const getApiAndEmit = (socket) => {
           try{
@@ -42,7 +46,7 @@ const getApiAndEmit = (socket) => {
                   host: "173.214.168.54",
                   user: "bustadmin_dbadm",
                   password: ";,bp~AcEX,*a",
-                  database:"bustadmin_paydb"
+                  database:"bustadmin_paydb",
                 });
                   con.connect(function(err) {
                     if (err) throw err;
@@ -50,7 +54,7 @@ const getApiAndEmit = (socket) => {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
                         var row = result[key];
-                        // console.log(row);
+                        console.log(row)
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
                         if(transaction){
                           const response = {deposited: false};                            
@@ -67,10 +71,22 @@ const getApiAndEmit = (socket) => {
                                   phone: row.bill_ref_number
                             })
                           await trans.save()
-                          const account = await Account.findOne({ phone:row.bill_ref_number});
-                          account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
-                          await account.save()
                           const user = await User.findOne({ phone:row.bill_ref_number});
+                          const account = await Account.findOne({ phone:row.bill_ref_number});
+
+                          if(user.label === "2" || user.label === "3"){
+                            account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount).toFixed(2)
+                            await account.save()
+                          }
+
+                          if(user.label === "1"){
+                            account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount).toFixed(2)*2
+                            await account.save()
+                            user.firstDeposit = parseFloat(row.trans_amount).toFixed(2)
+                            user.label="2"
+                            await user.save()
+                          }
+                       
                           const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           if(!av_log){
                               const log = new Logs({
@@ -88,13 +104,13 @@ const getApiAndEmit = (socket) => {
                          return 
                      });
                 })
-              return con.end(()=>console.log("connection closed"))
+              con.end(()=>console.log("connection closed"))              
             });
           }catch(err){
           console.log(err)
       }
 };
-
+server.timeout = 0;
 mongoose
   .connect(
     `mongodb+srv://Trisonweru:${process.env.PASSWORD}@cluster0.rgm0s.mongodb.net/safaribustdb?retryWrites=true&w=majority`

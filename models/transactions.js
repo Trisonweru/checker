@@ -9,16 +9,20 @@ const transactionSchema = new Schema({
   },
   trans_id:{
     type: String,
-    required: true,
-    unique: true,
+    required: false,
+    unique: false,
   },
   bill_ref_number:{
     type: String,
-    required: true,
+    required: false,
   },
   trans_time:{
     type: String,
-    required: true,
+    required: false,
+  },
+  conversationID:{
+    type: String,
+    required: false,
   },
   amount: {
     type: String,
