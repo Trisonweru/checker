@@ -54,6 +54,7 @@ const getApiAndEmit = (socket) => {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
                         var row = result[key];
+                        // console.log(row)
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
                         if(transaction){
                           const response = {deposited: false};                            
@@ -71,24 +72,34 @@ const getApiAndEmit = (socket) => {
                             })
                           await trans.save()
                           const user = await User.findOne({ phone:row.bill_ref_number});
+                          const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           const account = await Account.findOne({ phone:row.bill_ref_number});
 
-                          console.log(user.label)
+                          console.log(account?.balance)
+                          console.log(user.label === "3")
 
-                          if(user.label === "2" || user.label === "3" || user.label===undefined){
-                            account.balance=parseFloat(account?.balance).toFixed(2) + parseFloat(row.trans_amount).toFixed(2)
+                          if(user.label === "3" ){
+                            console.log("hello3")
+                            account.balance=parseFloat((+account?.balance )+ (+row.trans_amount)).toFixed(2) 
+                            console.log(account?.balance)
+                            console.log(account)
+                            await account.save()
+                          }
+                          if(user.label === "2" ){
+                            account.balance=parseFloat((+account?.balance )+ (+row.trans_amount)).toFixed(2) 
+                            console.log("hello2")
                             await account.save()
                           }
 
                           if(user.label === "1"){
-                            account.balance=parseFloat(account?.balance).toFixed(2) + parseFloat(row.trans_amount).toFixed(2)*2
+                            console.log("hello1")
+                            account.balance=parseFloat((+account?.balance )+ ((+row.trans_amount)*2)).toFixed(2) 
                             await account.save()
                             user.firstDeposit = parseFloat(row.trans_amount).toFixed(2)
                             user.label="2"
                             await user.save()
                           }
                        
-                          const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           if(!av_log){
                               const log = new Logs({
                                   ip: "deposit",
