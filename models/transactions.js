@@ -20,14 +20,23 @@ const transactionSchema = new Schema({
     type: String,
     required: false,
   },
-  conversationID:{
+   conversationID:{
     type: String,
     required: false,
+    unique: false,
   },
   amount: {
     type: String,
     required: true,
   },
+  balance:{
+      type: String,
+      required: false,
+    },  
+  username:{
+      type: String,
+      required: false,
+    },
   user:{
     type:Schema.Types.ObjectId,
     ref:"User"

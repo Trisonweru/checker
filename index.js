@@ -24,7 +24,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -56,6 +56,10 @@ const getApiAndEmit = (socket) => {
                         var row = result[key];
                         // console.log(row)
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
+                        const user = await User.findOne({ phone:row.bill_ref_number});
+                        const av_log = await Logs.findOne({ transactionId:row.trans_id});
+                        const account = await Account.findOne({ phone:row.bill_ref_number});
+                        
                         if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
@@ -68,21 +72,17 @@ const getApiAndEmit = (socket) => {
                                   bill_ref_number:row.bill_ref_number,
                                   trans_time:row.trans_time,
                                   amount:row.trans_amount,
-                                  phone: row.bill_ref_number
+                                  phone: row.bill_ref_number,
+                                  username:user.username,
+                                  balance:account.balance
+
                             })
                           await trans.save()
-                          const user = await User.findOne({ phone:row.bill_ref_number});
-                          const av_log = await Logs.findOne({ transactionId:row.trans_id});
-                          const account = await Account.findOne({ phone:row.bill_ref_number});
-
-                          console.log(account?.balance)
-                          console.log(user.label === "3")
+                         
 
                           if(user.label === "3" ){
                             console.log("hello3")
                             account.balance=parseFloat((+account?.balance )+ (+row.trans_amount)).toFixed(2) 
-                            console.log(account?.balance)
-                            console.log(account)
                             await account.save()
                           }
                           if(user.label === "2" ){
@@ -92,7 +92,6 @@ const getApiAndEmit = (socket) => {
                           }
 
                           if(user.label === "1"){
-                            console.log("hello1")
                             account.balance=parseFloat((+account?.balance )+ ((+row.trans_amount)*2)).toFixed(2) 
                             await account.save()
                             user.firstDeposit = parseFloat(row.trans_amount).toFixed(2)
@@ -105,7 +104,8 @@ const getApiAndEmit = (socket) => {
                                   ip: "deposit",
                                   description: `${row.bill_ref_number} deposited ${row.trans_amount} - Code:${row.trans_id}`,
                                   user: user.id,
-                                  transactionId:row.trans_id
+                                  transactionId:row.trans_id,
+                                  balance:account.balance
                               });
                             log.save();
                           }

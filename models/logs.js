@@ -24,10 +24,15 @@ const logsSchema = new Schema(
       type: String,
       required: false,
     },
-    conversationID:{
+     balance:{
       type: String,
       required: false,
     },
+    conversationID:{
+      type: String,
+      required: false,
+      unique: false,
+  },
     at: {
       type: Number,
       required: false,
