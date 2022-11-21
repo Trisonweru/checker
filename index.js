@@ -24,7 +24,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -59,18 +59,16 @@ const getApiAndEmit = (socket) => {
                         if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
-                          return
+                          return response
                         }
 
                           ids.push(row.trans_id)
                        
                           const account = await Account.findOne({ phone:row.bill_ref_number});
                           const user = await User.findOne({ phone:row.bill_ref_number});
-                          account.balance=user.label ==="1" ?parseFloat(account?.balance) + (parseFloat(row.trans_amount)*2):parseFloat(account?.balance) + parseFloat(row.trans_amount)
-                         
+                          account.balance=user.label === "1"? parseFloat(account?.balance) + (parseFloat(row.trans_amount)*2): parseFloat(account?.balance) + parseFloat(row.trans_amount)
                           user.label =user.label="1"&&"2"
                           user.firstDeposit =user.label ==="1"&& parseFloat(row.trans_amount).toFixed(2)
-                         
                           const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           const trans= new Transaction({
                                   type:"Deposit",
