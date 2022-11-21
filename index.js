@@ -66,9 +66,9 @@ const getApiAndEmit = (socket) => {
                        
                           const account = await Account.findOne({ phone:row.bill_ref_number});
                           const user = await User.findOne({ phone:row.bill_ref_number});
-                          account.balance=user.label === "1"? parseFloat(account?.balance) + (parseFloat(row.trans_amount)*2): parseFloat(account?.balance) + parseFloat(row.trans_amount)
+                          account.balance=user.label === "1"? parseFloat(+account?.balance) + parseFloat(+row.trans_amount)*2: parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
                           user.label =user.label="1"&&"2"
-                          user.firstDeposit =user.label ==="1"&& parseFloat(row.trans_amount).toFixed(2)
+                          user.firstDeposit =user.label ==="1"&& parseFloat(+row.trans_amount).toFixed(2)
                           const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           const trans= new Transaction({
                                   type:"Deposit",
