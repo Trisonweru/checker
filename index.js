@@ -24,7 +24,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -54,18 +54,24 @@ const getApiAndEmit = (socket) => {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
                         var row = result[key];
-                        // console.log(row)
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
-                        const user = await User.findOne({ phone:row.bill_ref_number});
-                        const av_log = await Logs.findOne({ transactionId:row.trans_id});
-                        const account = await Account.findOne({ phone:row.bill_ref_number});
-                        
+
                         if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
                           return
                         }
+
                           ids.push(row.trans_id)
+                       
+                          const account = await Account.findOne({ phone:row.bill_ref_number});
+                          const user = await User.findOne({ phone:row.bill_ref_number});
+                          account.balance=user.label ==="1" ?parseFloat(account?.balance) + (parseFloat(row.trans_amount)*2):parseFloat(account?.balance) + parseFloat(row.trans_amount)
+                         
+                          user.label =user.label="1"&&"2"
+                          user.firstDeposit =user.label ==="1"&& parseFloat(row.trans_amount).toFixed(2)
+                         
+                          const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           const trans= new Transaction({
                                   type:"Deposit",
                                   trans_id:row.trans_id,
@@ -75,37 +81,16 @@ const getApiAndEmit = (socket) => {
                                   phone: row.bill_ref_number,
                                   username:user.username,
                                   balance:account.balance
-
                             })
+                          await account.save()
                           await trans.save()
-                         
-
-                          if(user.label === "3" ){
-                            console.log("hello3")
-                            account.balance=parseFloat((+account?.balance )+ (+row.trans_amount)).toFixed(2) 
-                            await account.save()
-                          }
-                          if(user.label === "2" ){
-                            account.balance=parseFloat((+account?.balance )+ (+row.trans_amount)).toFixed(2) 
-                            console.log("hello2")
-                            await account.save()
-                          }
-
-                          if(user.label === "1"){
-                            account.balance=parseFloat((+account?.balance )+ ((+row.trans_amount)*2)).toFixed(2) 
-                            await account.save()
-                            user.firstDeposit = parseFloat(row.trans_amount).toFixed(2)
-                            user.label="2"
-                            await user.save()
-                          }
-                       
+                          await user.save()
                           if(!av_log){
                               const log = new Logs({
                                   ip: "deposit",
                                   description: `${row.bill_ref_number} deposited ${row.trans_amount} - Code:${row.trans_id}`,
                                   user: user.id,
-                                  transactionId:row.trans_id,
-                                  balance:account.balance
+                                  transactionId:row.trans_id
                               });
                             log.save();
                           }
