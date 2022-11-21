@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3001",
+    origin: "https://safaribust.co.ke",
   },
 });
 
@@ -53,7 +53,7 @@ const getApiAndEmit = (socket) => {
                         // console.log(row.trans_id);
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
                         // console.log(transaction.trans_id)
-                        if(transaction.trans_id !== null||transaction.trans_id !== undefined){
+                        if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
                           return
