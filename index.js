@@ -56,14 +56,13 @@ const getApiAndEmit = (socket) => {
                         var row = result[key];
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
 
-                        if(ids.includes(row.trans_id)){
+                        if(transaction.createdAt){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
-                          return response
+                          return 
                         }
-
+                        if(!transaction){
                           ids.push(row.trans_id)
-                       
                           const account = await Account.findOne({ phone:row.bill_ref_number});
                           const user = await User.findOne({ phone:row.bill_ref_number});
                           account.balance=user.label === "1"? parseFloat(+account?.balance) + parseFloat(+row.trans_amount)*2: parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
@@ -97,6 +96,8 @@ const getApiAndEmit = (socket) => {
                               };
                            io.sockets.emit("FromAPI2", response);
                          return 
+                        }
+                        
                      });
                 })
               con.end(()=>console.log("connection closed"))              
