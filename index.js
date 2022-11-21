@@ -56,7 +56,7 @@ const getApiAndEmit = (socket) => {
                         var row = result[key];
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
 
-                        if(transaction.createdAt){
+                        if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
                           return 
