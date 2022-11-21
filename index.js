@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
   if (interval) {
     clearInterval(interval);
   }
-  setInterval(() => getApiAndEmit(socket), 5000);
+  setInterval(() => getApiAndEmit(socket), 8000);
   socket.on("disconnect", (reason) => {
   });
 });
