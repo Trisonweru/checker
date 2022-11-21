@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "http://safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -35,7 +35,6 @@ io.on("connection", (socket) => {
   setInterval(() => getApiAndEmit(socket), 5000);
   socket.on("disconnect", (reason) => {
   });
-
 });
 const getApiAndEmit = (socket) => {
           try{
@@ -43,11 +42,7 @@ const getApiAndEmit = (socket) => {
                   host: "173.214.168.54",
                   user: "bustadmin_dbadm",
                   password: ";,bp~AcEX,*a",
-                  database:"bustadmin_paydb",
-                  multipleStatements : true,
-                  connectionLimit: 10,
-                  acquireTimeout: 30000,
-                  minConnections: 1,
+                  database:"bustadmin_paydb"
                 });
                   con.connect(function(err) {
                     if (err) throw err;
@@ -55,8 +50,10 @@ const getApiAndEmit = (socket) => {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
                         var row = result[key];
+                        // console.log(row.trans_id);
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
-                        if(transaction){
+                        // console.log(transaction.trans_id)
+                        if(transaction.trans_id !== null||transaction.trans_id !== undefined){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
                           return
@@ -87,19 +84,19 @@ const getApiAndEmit = (socket) => {
                           }
                           const response = {
                                 deposited: true,
-                                trans_id:transaction.trans_id
+                                trans_id:row.trans_id
                               };
                            io.sockets.emit("FromAPI2", response);
                          return 
                      });
                 })
-              con.end(()=>console.log("connection closed"))
+              return con.end(()=>console.log("connection closed"))
             });
           }catch(err){
           console.log(err)
       }
 };
-server.timeout = 0;
+
 mongoose
   .connect(
     `mongodb+srv://Trisonweru:${process.env.PASSWORD}@cluster0.rgm0s.mongodb.net/safaribustdb?retryWrites=true&w=majority`
