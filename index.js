@@ -50,15 +50,21 @@ const getApiAndEmit = (socket) => {
                         if (err) throw err;                       
                         Object.keys(result).forEach(async function(key) {
                         var row = result[key];
-                        // console.log(row.trans_id);
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
-                        // console.log(transaction.trans_id)
                         if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
                           return
                         }
                           ids.push(row.trans_id)
+                          const account = await Account.findOne({ phone:row.bill_ref_number});
+                          account.balance=parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
+                           const response = {
+                                deposited: true,
+                                trans_id:row.trans_id
+                              };
+                          io.sockets.emit("FromAPI2", response);
+                          await account.save()
                           const trans= new Transaction({
                                   type:"Deposit",
                                   trans_id:row.trans_id,
@@ -68,10 +74,8 @@ const getApiAndEmit = (socket) => {
                                   phone: row.bill_ref_number
                             })
                           await trans.save()
-                          const account = await Account.findOne({ phone:row.bill_ref_number});
-                          account.balance=parseFloat(account?.balance) + parseFloat(row.trans_amount)
-                          await account.save()
                           const user = await User.findOne({ phone:row.bill_ref_number});
+
                           const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           if(!av_log){
                               const log = new Logs({
@@ -80,13 +84,8 @@ const getApiAndEmit = (socket) => {
                                   user: user.id,
                                   transactionId:row.trans_id
                               });
-                            log.save();
+                            await log.save();
                           }
-                          const response = {
-                                deposited: true,
-                                trans_id:row.trans_id
-                              };
-                           io.sockets.emit("FromAPI2", response);
                          return 
                      });
                 })
