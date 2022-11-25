@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
   if (interval) {
     clearInterval(interval);
   }
-  setInterval(() => getApiAndEmit(socket), 8000);
+  setInterval(() => getApiAndEmit(socket), 5000);
   socket.on("disconnect", (reason) => {
   });
 });
@@ -56,9 +56,8 @@ const getApiAndEmit = (socket) => {
                           io.sockets.emit("FromAPI2", response);
                           return
                         }
-                          ids.push(row.trans_id)
                           const account = await Account.findOne({ phone:row.bill_ref_number});
-                          account.balance=parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
+                          account.balance=transaction?account.balance:parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
                            const response = {
                                 deposited: true,
                                 trans_id:row.trans_id
