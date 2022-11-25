@@ -66,7 +66,7 @@ const getApiAndEmit = (socket) => {
                             })
                             await trans.save().then(async(res)=>{
                               console.log(res);
-                              if(res.data){
+                              if(res.type){
                                 const account = await Account.findOne({ phone:row.bill_ref_number});
                                 account.balance=parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
                                 await account.save()
