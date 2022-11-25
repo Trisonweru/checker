@@ -56,14 +56,17 @@ const getApiAndEmit = (socket) => {
                           io.sockets.emit("FromAPI2", response);
                           return
                         }
-                          const account = await Account.findOne({ phone:row.bill_ref_number});
-                          account.balance=transaction?account.balance:parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
-                           const response = {
-                                deposited: true,
-                                trans_id:row.trans_id
-                              };
-                          io.sockets.emit("FromAPI2", response);
-                          await account.save()
+                          if(!ids.includes(row.trans_id)){
+                            const account = await Account.findOne({ phone:row.bill_ref_number});
+                            account.balance=parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
+                            await account.save()
+                            const response = {
+                                      deposited: true,
+                                      trans_id:row.trans_id
+                                    };
+                            io.sockets.emit("FromAPI2", response);
+                            ids.push(row.trans_id)
+                         
                           const trans= new Transaction({
                                   type:"Deposit",
                                   trans_id:row.trans_id,
@@ -74,7 +77,6 @@ const getApiAndEmit = (socket) => {
                             })
                           await trans.save()
                           const user = await User.findOne({ phone:row.bill_ref_number});
-
                           const av_log = await Logs.findOne({ transactionId:row.trans_id});
                           if(!av_log){
                               const log = new Logs({
@@ -86,6 +88,7 @@ const getApiAndEmit = (socket) => {
                             await log.save();
                           }
                          return 
+                          }
                      });
                 })
               return con.end(()=>console.log("connection closed"))
