@@ -21,7 +21,7 @@ let interval;
 
 const io = socketIo(server, {
   cors: {
-    origin: "https://safaribust.co.ke",
+    origin: "http://localhost:3001",
   },
 });
 
@@ -33,7 +33,7 @@ io.on("connection", (socket) => {
   if (interval) {
     clearInterval(interval);
   }
-  setInterval(() => getApiAndEmit(socket), 5000);
+  setInterval(() => getApiAndEmit(socket), 10000);
   socket.on("disconnect", (reason) => {
   });
 });
@@ -62,11 +62,11 @@ const getApiAndEmit = (socket) => {
                         }
                         let it = ids.filter((item)=>item.trans_id === row.trans_id)
                         // console.log(it)
-                        if(it.length <1){
-                          ids.push(row)
-                        }
+                          if(it.length < 1){
+                            ids.push(row)
+                            console.log(ids)
+                          }
                         // console.log("Hello");
-                        // console.log(ids)
                         // console.log(set)
                         
                           //   await trans.save().then(async(res)=>{
@@ -95,7 +95,6 @@ const getApiAndEmit = (socket) => {
                           // }).catch(err=>console.log(err))
                      });
                 })
-
                ids.length>0&&ids.map(async(item)=>{
                   const trans= new Transaction({
                                   type:"Deposit",
@@ -104,8 +103,9 @@ const getApiAndEmit = (socket) => {
                                   trans_time:item.trans_time,
                                   amount:item.trans_amount
                                   })
-                                  
-                  const account = await Account.findOne({ phone:item.bill_ref_number});
+                  await trans.save().then(async(res)=>{
+                    if(res.type){
+                            const account = await Account.findOne({ phone:item.bill_ref_number});
                   account.balance=parseFloat(+account?.balance) + parseFloat(+item.trans_amount)
                   await account.save().then(async()=>{
                      const response = {
@@ -113,12 +113,11 @@ const getApiAndEmit = (socket) => {
                                           trans_id:item.trans_id
                                         };
                       io.sockets.emit("FromAPI2", response);
-                      await trans.save()
-                    let remItems= ids.filter((it)=>it.trans_id !==item.trans_id)
-                    ids=remItems;
-
                     console.log(ids)
                   })
+                    }
+                  }).catch(err=>console.log(err))         
+             
                 })
 
               return con.end(()=>console.log("connection closed"))
