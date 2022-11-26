@@ -75,6 +75,7 @@ const getApiAndEmit = (socket) => {
                                           trans_id:row.trans_id
                                         };
                                 io.sockets.emit("FromAPI2", response);
+                                
                                 // const user = await User.findOne({ phone:row.bill_ref_number});
                                 // const av_log = await Logs.findOne({ transactionId:row.trans_id});
                                 // if(!av_log){
