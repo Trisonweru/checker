@@ -51,6 +51,7 @@ const getApiAndEmit = (socket) => {
                         Object.keys(result).forEach(async function(key) {
                         var row = result[key];
                         const transaction= await Transaction.findOne({trans_id:row.trans_id})
+                        const account = await Account.findOne({ phone:row.bill_ref_number});
                         if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
@@ -67,7 +68,6 @@ const getApiAndEmit = (socket) => {
                             await trans.save().then(async(res)=>{
                               console.log(res);
                               if(res.type){
-                                const account = await Account.findOne({ phone:row.bill_ref_number});
                                 account.balance=parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
                                 await account.save()
                                 const response = {
