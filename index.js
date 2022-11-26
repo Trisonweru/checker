@@ -75,17 +75,17 @@ const getApiAndEmit = (socket) => {
                                           trans_id:row.trans_id
                                         };
                                 io.sockets.emit("FromAPI2", response);
-                                const user = await User.findOne({ phone:row.bill_ref_number});
-                                const av_log = await Logs.findOne({ transactionId:row.trans_id});
-                                if(!av_log){
-                                    const log = new Logs({
-                                        ip: "deposit",
-                                        description: `${row.bill_ref_number} deposited ${row.trans_amount} - Code:${row.trans_id}`,
-                                        user: user.id,
-                                        transactionId:row.trans_id
-                                    });
-                                  await log.save();
-                                }
+                                // const user = await User.findOne({ phone:row.bill_ref_number});
+                                // const av_log = await Logs.findOne({ transactionId:row.trans_id});
+                                // if(!av_log){
+                                //     const log = new Logs({
+                                //         ip: "deposit",
+                                //         description: `${row.bill_ref_number} deposited ${row.trans_amount} - Code:${row.trans_id}`,
+                                //         user: user.id,
+                                //         transactionId:row.trans_id
+                                //     });
+                                //   await log.save();
+                                //}
                               return 
                             }
                           }).catch(err=>console.log(err))
