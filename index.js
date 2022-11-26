@@ -37,66 +37,66 @@ io.on("connection", (socket) => {
   });
 });
 const getApiAndEmit = (socket) => {
-          try{
-               var con = mysql.createConnection({
-                  host: "173.214.168.54",
-                  user: "bustadmin_dbadm",
-                  password: ";,bp~AcEX,*a",
-                  database:"bustadmin_paydb"
-                });
-                  con.connect(function(err) {
-                    if (err) throw err;
-                        con.query(`SELECT * FROM transaction`, function (err, result) {
-                        if (err) throw err;                       
-                        Object.keys(result).forEach(async function(key) {
-                        var row = result[key];
-                        const transaction= await Transaction.findOne({trans_id:row.trans_id})
-                        const account = await Account.findOne({ phone:row.bill_ref_number});
-                        if(transaction){
-                          const response = {deposited: false};                            
-                          io.sockets.emit("FromAPI2", response);
-                          return next()
-                        }
-                            const trans= new Transaction({
-                                  type:"Deposit",
-                                  trans_id:row.trans_id,
-                                  bill_ref_number:row.bill_ref_number,
-                                  trans_time:row.trans_time,
-                                  amount:row.trans_amount,
-                                  phone: row.bill_ref_number
-                            })
-                            await trans.save().then(async(res)=>{
-                              console.log(res);
-                              if(res.type){
-                                account.balance=parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
-                                await account.save()
-                                const response = {
-                                          deposited: true,
-                                          trans_id:row.trans_id
-                                        };
-                                io.sockets.emit("FromAPI2", response);
+      //     try{
+      //          var con = mysql.createConnection({
+      //             host: "173.214.168.54",
+      //             user: "bustadmin_dbadm",
+      //             password: ";,bp~AcEX,*a",
+      //             database:"bustadmin_paydb"
+      //           });
+      //             con.connect(function(err) {
+      //               if (err) throw err;
+      //                   con.query(`SELECT * FROM transaction`, function (err, result) {
+      //                   if (err) throw err;                       
+      //                   Object.keys(result).forEach(async function(key) {
+      //                   var row = result[key];
+      //                   const transaction= await Transaction.findOne({trans_id:row.trans_id})
+      //                   const account = await Account.findOne({ phone:row.bill_ref_number});
+      //                   if(transaction){
+      //                     const response = {deposited: false};                            
+      //                     io.sockets.emit("FromAPI2", response);
+      //                     return
+      //                   }
+      //                       const trans= new Transaction({
+      //                             type:"Deposit",
+      //                             trans_id:row.trans_id,
+      //                             bill_ref_number:row.bill_ref_number,
+      //                             trans_time:row.trans_time,
+      //                             amount:row.trans_amount,
+      //                             phone: row.bill_ref_number
+      //                       })
+      //                       await trans.save().then(async(res)=>{
+      //                         console.log(res);
+      //                         if(res.type){
+      //                           account.balance=parseFloat(+account?.balance) + parseFloat(+row.trans_amount)
+      //                           await account.save()
+      //                           const response = {
+      //                                     deposited: true,
+      //                                     trans_id:row.trans_id
+      //                                   };
+      //                           io.sockets.emit("FromAPI2", response);
                                 
-                                // const user = await User.findOne({ phone:row.bill_ref_number});
-                                // const av_log = await Logs.findOne({ transactionId:row.trans_id});
-                                // if(!av_log){
-                                //     const log = new Logs({
-                                //         ip: "deposit",
-                                //         description: `${row.bill_ref_number} deposited ${row.trans_amount} - Code:${row.trans_id}`,
-                                //         user: user.id,
-                                //         transactionId:row.trans_id
-                                //     });
-                                //   await log.save();
-                                //}
-                              return 
-                            }
-                          }).catch(err=>console.log(err))
-                     });
-                })
-              return con.end(()=>console.log("connection closed"))
-            });
-          }catch(err){
-          console.log(err)
-      }
+      //                           // const user = await User.findOne({ phone:row.bill_ref_number});
+      //                           // const av_log = await Logs.findOne({ transactionId:row.trans_id});
+      //                           // if(!av_log){
+      //                           //     const log = new Logs({
+      //                           //         ip: "deposit",
+      //                           //         description: `${row.bill_ref_number} deposited ${row.trans_amount} - Code:${row.trans_id}`,
+      //                           //         user: user.id,
+      //                           //         transactionId:row.trans_id
+      //                           //     });
+      //                           //   await log.save();
+      //                           //}
+      //                         return 
+      //                       }
+      //                     }).catch(err=>console.log(err))
+      //                });
+      //           })
+      //         return con.end(()=>console.log("connection closed"))
+      //       });
+      //     }catch(err){
+      //     console.log(err)
+      // }
 };
 
 mongoose
