@@ -55,7 +55,7 @@ const getApiAndEmit = (socket) => {
                         if(transaction){
                           const response = {deposited: false};                            
                           io.sockets.emit("FromAPI2", response);
-                          return
+                          return next()
                         }
                             const trans= new Transaction({
                                   type:"Deposit",
