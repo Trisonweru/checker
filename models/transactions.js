@@ -37,6 +37,10 @@ const transactionSchema = new Schema({
       type: String,
       required: false,
     },
+  floatBalance:{
+    type:String,
+    required:false
+  },
   user:{
     type:Schema.Types.ObjectId,
     ref:"User"
